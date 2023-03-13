@@ -1,0 +1,17 @@
+.idea
+.fleet
+.vscode
+.pytest_cache
+.mypy_cache
+.coverage
+coverage.xml
+**/__pycache__
+src
+results/
+build/
+dist/
+*.egg-info/
+.python-version
+*.ts
+*.csv
+*.pdf

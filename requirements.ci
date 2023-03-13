@@ -1,0 +1,10 @@
+pytest
+pytest-cov
+mypy==0.920
+twine
+freezegun
+black
+
+# typings
+types-requests
+types-freezegun
