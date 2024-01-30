@@ -8,10 +8,20 @@ all=('Adiac' 'ArrowHead' 'Beef' 'BeetleFly' 'BirdChicken' 'Car' 'CBF' 'ChlorineC
 n_clusters=(37 3 5 2 2 4 3 3 4 2 2 12 12 12 4 3 2 6 2 2 5 2 7 14 4 14 50 7 2 2 2 2 2 5 2 7 11 2 3 2 7 8 3 10 3 2 6 2 42 42 4 6 2 39 7 3 2 6 3 3 2 60 3 2 2 3 2 15 6 6 2 2 4 2 4 8 8 8 8 2 2 25 5 2 2 10 10 10 10 3 2 24 7 2 2 12 12 4 2 2 18 26 26 26 6 6 2 2 2 2 3 3 10 5 5 10 52 52 52 11 2 4 2 6 5 10 3 3)
 len_all=${#all[@]}
 len_vary=${#vary[@]}
+with_vary=true
 
-for ((i=0;i<len_all;i++)); do
-    if [[ ! " ${vary_ds[@]} " =~ " ${all[$i]} " ]]; then
-        continue
-    fi
-    python -m experiments.ucr_pipeline --path ~/datasets/UCRArchive_2018/${all[$i]}/${all[$i]}_TEST.tsv --results-path ./results-paper-algorithms.csv --n-jobs 12 --n-clusters ${n_clusters[$i]} --host odin03 ${@}
-done
+if [ "$with_vary" = true ]; then
+    for ((i=0;i<len_all;i++)); do
+        if [[ ! " ${vary_ds[@]} " =~ " ${all[$i]} " ]]; then
+            continue
+        fi
+        python -m experiments.ucr_pipeline --path ~/datasets/UCRArchive_2018/${all[$i]}/${all[$i]}_TEST.tsv --results-path ./results-paper-algorithms.csv --n-jobs 12 --n-clusters ${n_clusters[$i]} --host odin03 ${@}
+    done
+else
+    for ((i=0;i<len_all;i++)); do
+        if [[ " ${vary_ds[@]} " =~ " ${all[$i]} " ]]; then
+            continue
+        fi
+        python -m experiments.ucr_pipeline --path ~/datasets/UCRArchive_2018/${all[$i]}/${all[$i]}_TEST.tsv --results-path ./results-paper-algorithms.csv --n-jobs 12 --n-clusters ${n_clusters[$i]} --equal-lengths --host odin03 ${@}
+    done
+fi

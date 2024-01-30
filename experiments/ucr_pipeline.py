@@ -51,6 +51,7 @@ def run_pipeline(
     algorithms: Optional[List[str]] = None,
     host: str = "localhost",
     port: int = 6379,
+    equal_lengths: bool = False,
 ):
     #############
     ### SETUP ###
@@ -145,8 +146,8 @@ def run_pipeline(
     ### K-Shape ###
     ###############
 
-    if algorithms is None or "K-Shape" in algorithms:
-        clustering = p.add_timed_transformer(KShape(n_clusters=n_clusters, interpolation=Interpolation.DOWN))
+    if (algorithms is None or "K-Shape" in algorithms) and equal_lengths:
+        clustering = p.add_timed_transformer(KShape(n_clusters=n_clusters))
         p.add_connection(loader, clustering, ("data", "data"))
 
         write_result_to_file(
@@ -162,7 +163,7 @@ def run_pipeline(
     ### K-Means Euclidean ###
     #########################
 
-    if algorithms is None or "K-Means-Euclidean" in algorithms:
+    if (algorithms is None or "K-Means-Euclidean" in algorithms) and equal_lengths:
         clustering = p.add_timed_transformer(KMeans(n_clusters=n_clusters, n_jobs=n_jobs, metric="euclidean"))
         p.add_connection(loader, clustering, ("data", "data"))
 
@@ -179,9 +180,9 @@ def run_pipeline(
     ### MeanShift ###
     #################
 
-    if algorithms is None or "MeanShift" in algorithms:
+    if (algorithms is None or "MeanShift" in algorithms) and equal_lengths:
         clustering = p.add_timed_transformer(
-            MeanShift(n_threads=n_jobs, distance_measure="euclidean", interpolation=Interpolation.DOWN)
+            MeanShift(n_threads=n_jobs, distance_measure="euclidean")
         )
         p.add_connection(loader, clustering, ("data", "data"))
 
@@ -198,8 +199,8 @@ def run_pipeline(
     ### DBSCAN ###
     ##############
 
-    if algorithms is None or "DBSCAN" in algorithms:
-        clustering = p.add_timed_transformer(DBScan(n_jobs=n_jobs, interpolation=Interpolation.DOWN))
+    if (algorithms is None or "DBSCAN" in algorithms) and equal_lengths:
+        clustering = p.add_timed_transformer(DBScan(n_jobs=n_jobs))
         p.add_connection(loader, clustering, ("data", "data"))
 
         write_result_to_file(
@@ -215,8 +216,8 @@ def run_pipeline(
     ### OPTICS ###
     ##############
 
-    if algorithms is None or "OPTICS" in algorithms:
-        clustering = p.add_timed_transformer(Optics(n_jobs=n_jobs, interpolation=Interpolation.DOWN))
+    if (algorithms is None or "OPTICS" in algorithms) and equal_lengths:
+        clustering = p.add_timed_transformer(Optics(n_jobs=n_jobs))
         p.add_connection(loader, clustering, ("data", "data"))
 
         write_result_to_file(
@@ -232,9 +233,9 @@ def run_pipeline(
     ### Birch ###
     #############
 
-    if algorithms is None or "Birch" in algorithms:
+    if (algorithms is None or "Birch" in algorithms) and equal_lengths:
         clustering = p.add_timed_transformer(
-            Birch(n_clusters=n_clusters, n_jobs=n_jobs, interpolation=Interpolation.DOWN)
+            Birch(n_clusters=n_clusters, n_jobs=n_jobs)
         )
         p.add_connection(loader, clustering, ("data", "data"))
 
@@ -390,6 +391,8 @@ def run_pipeline(
             meta={"dataset": path, "algorithm": "HappieClust"},
             timed=clustering,
         )
+    
+    p.plot()
 
 
 def generate_args() -> argparse.Namespace:
@@ -401,6 +404,7 @@ def generate_args() -> argparse.Namespace:
     parser.add_argument("--n-clusters", type=int, required=True)
     parser.add_argument("--distributed", action="store_true", dest="distributed")
     parser.add_argument("--scheduler", action="store_true", dest="scheduler")
+    parser.add_argument("--equal-lengths", action="store_true", dest="equal_lengths")
     # list argument for only running specific algorithms
     parser.add_argument("--algorithms", nargs="+", type=str, default=None)
     parser.add_argument("--host", type=str, default="localhost")
@@ -422,4 +426,5 @@ if __name__ == "__main__":
         args.algorithms,
         host=args.host,
         port=args.port,
+        equal_lengths=args.equal_lengths
     )
